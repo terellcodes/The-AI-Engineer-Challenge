@@ -32,6 +32,13 @@ export default function Home() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
+  const getApiBaseUrl = () => {
+    if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+      return "http://localhost:8000/api/chat";
+    }
+    return "https://api-empty-paper-274.fly.dev/api/chat";
+  };
+
   const handleSend = async () => {
     if (!userInput.trim() || loading) return;
     if (!apiKey) {
@@ -48,7 +55,7 @@ export default function Home() {
     setUserInput("");
     setLoading(true);
     try {
-      const response = await fetch("/api/chat", {
+      const response = await fetch(getApiBaseUrl(), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
