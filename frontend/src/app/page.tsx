@@ -157,11 +157,11 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center font-quicksand relative">
+    <div className="min-h-screen flex flex-col items-center justify-start font-quicksand relative pt-2 pb-0">
       {/* Grain overlay for texture */}
       <div className="ghibli-grain" aria-hidden="true" />
       {/* Header */}
-      <header className="w-full max-w-2xl mx-auto flex items-center justify-between py-6 px-4">
+      <header className="w-full max-w-2xl mx-auto flex items-center justify-between py-3 px-4 mb-2">
         <motion.h1
           className="text-3xl font-bold flex items-center gap-3 select-none text-[#355c3a]"
           initial={{ opacity: 0, y: -30 }}
@@ -252,12 +252,12 @@ export default function Home() {
 
       {/* Chat Container */}
       <motion.div
-        className="w-full max-w-2xl flex-1 flex flex-col bg-ghibli-parchment ghibli-shadow ghibli-rounded p-4 sm:p-6 mb-8 border-2 border-[#e6dcc3] relative z-10"
+        className="w-full max-w-2xl flex flex-col bg-ghibli-parchment ghibli-shadow ghibli-rounded p-4 sm:p-6 border-2 border-[#e6dcc3] relative z-10 h-[85vh] min-h-[500px]"
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, type: "spring" }}
       >
-        <div className="flex-1 overflow-y-auto mb-4" style={{ maxHeight: "60vh" }}>
+        <div className="flex-1 overflow-y-auto mb-2 pr-1">
           <AnimatePresence initial={false}>
             {messages.map((msg, idx) => (
               <motion.div
@@ -307,7 +307,7 @@ export default function Home() {
           <div ref={chatEndRef} />
         </div>
         <form
-          className="flex items-end gap-2 relative"
+          className="flex items-end gap-2 relative pt-2 bg-transparent"
           onSubmit={e => { e.preventDefault(); handleSend(); }}
         >
           <span className="input-icon left-4"><FaUser /></span>
@@ -338,7 +338,7 @@ export default function Home() {
           </button>
         </form>
       </motion.div>
-      <footer className="text-xs text-yellow-900 mb-2 font-noto-serif drop-shadow-sm">Built with Next.js, Tailwind CSS, Framer Motion, and FastAPI &mdash; Inspired by Studio Ghibli</footer>
+      <footer className="text-xs text-yellow-900 font-noto-serif drop-shadow-sm mt-1 mb-0">Built with Next.js, Tailwind CSS, Framer Motion, and FastAPI &mdash; Inspired by Studio Ghibli</footer>
     </div>
   );
 }
