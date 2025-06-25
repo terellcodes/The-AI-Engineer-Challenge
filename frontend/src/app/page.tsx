@@ -107,12 +107,18 @@ export default function Home() {
         }
       }
       setLoading(false);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      let message = "Unknown error";
+      if (err instanceof Error) {
+        message = err.message;
+      } else if (typeof err === "string") {
+        message = err;
+      }
       setMessages((msgs) => [
         ...msgs,
         {
           role: "ai",
-          content: `Error: ${err.message}`,
+          content: `Error: ${message}`,
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         },
       ]);
