@@ -1,5 +1,7 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 import { FaUser, FaRobot } from "react-icons/fa";
 
 interface ConversationBubbleProps {
@@ -26,7 +28,10 @@ const ConversationBubble: React.FC<ConversationBubbleProps> = ({ role, content, 
     </span>
     <div>
       <div className="prose prose-sm max-w-none text-inherit">
-        <ReactMarkdown>
+        <ReactMarkdown
+          remarkPlugins={[remarkMath]}
+          rehypePlugins={[rehypeKatex]}
+        >
           {content}
         </ReactMarkdown>
       </div>

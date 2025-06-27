@@ -57,11 +57,23 @@ export default function Home() {
     setUserInput("");
     setLoading(true);
     try {
+      const latexInstruction = `
+You are a helpful AI assistant. When you include mathematical expressions in your responses, always format them using LaTeX syntax. Use single dollar signs \`$...$\` for inline math and double dollar signs \`$$...$$\` for display math. For example:
+
+- Inline: The solution is $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$.
+- Display:
+$$
+x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}
+$$
+
+Do not use any other delimiters for math. Always escape backslashes as needed for LaTeX.
+`;
+
       const response = await fetch(getApiBaseUrl(), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          developer_message: systemPrompt,
+          developer_message: systemPrompt + '\\n\\n' + latexInstruction,
           user_message: userInput,
           model,
           api_key: apiKey,
