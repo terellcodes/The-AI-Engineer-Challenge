@@ -1,7 +1,8 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { FaFeatherAlt, FaUser, FaRobot, FaMagic } from "react-icons/fa";
+import { FaUser, FaRobot, FaMagic } from "react-icons/fa";
 import React from "react";
 import ChatInputForm from "./components/ChatInputForm";
+import ConversationBubble from "./components/ConversationBubble";
 
 interface Message {
   role: "user" | "ai";
@@ -70,26 +71,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                   exit={{ opacity: 0, y: 20 }}
                   transition={{ duration: 0.3, type: "spring" }}
                 >
-                  <div
-                    className={`ghibli-rounded px-4 py-2 max-w-[60%] text-base shadow flex items-start gap-2 ${
-                      msg.role === "user"
-                        ? "bg-yellow-100 text-yellow-900 rounded-br-none border-2 border-yellow-200"
-                        : "bg-white text-green-900 rounded-bl-none border-2 border-green-100"
-                    }`}
-                    style={{ fontFamily: msg.role === "user" ? 'Quicksand' : 'Noto Serif JP' }}
-                  >
-                    <span className="mt-1">
-                      {msg.role === "user" ? (
-                        <FaUser className="text-yellow-700" />
-                      ) : (
-                        <FaRobot className="text-green-700" />
-                      )}
-                    </span>
-                    <div>
-                      <div>{msg.content}</div>
-                      <div className="text-xs text-gray-400 mt-1 text-right font-quicksand">{msg.time}</div>
-                    </div>
-                  </div>
+                  <ConversationBubble role={msg.role} content={msg.content} time={msg.time} />
                 </motion.div>
               ))}
             </AnimatePresence>
