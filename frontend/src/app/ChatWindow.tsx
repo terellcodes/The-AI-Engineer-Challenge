@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { FaUser, FaRobot, FaMagic } from "react-icons/fa";
-import React, { useEffect, useRef } from "react";
+import { FaRobot, FaMagic } from "react-icons/fa";
+import React, { useEffect, useRef, useState } from "react";
 import ChatInputForm from "./components/ChatInputForm";
 import ConversationBubble from "./components/ConversationBubble";
 
@@ -18,6 +18,7 @@ interface ChatWindowProps {
   handleSend: () => void;
   clearChat: () => void;
   setUserInput: (val: string) => void;
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   missingApiKey?: boolean;
   onShowSettings?: () => void;
 }
@@ -30,10 +31,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   handleSend,
   clearChat,
   setUserInput,
+  setMessages,
   missingApiKey,
   onShowSettings,
 }) => {
   const scrollableRef = useRef<HTMLDivElement>(null);
+  const [regenLoadingIndex, setRegenLoadingIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const el = scrollableRef.current;
@@ -41,6 +44,64 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       el.scrollTop = el.scrollHeight;
     }
   }, [messages, loading]);
+
+  // Regenerate handler
+  const handleRegenerate = async (aiIndex: number) => {
+    setRegenLoadingIndex(aiIndex);
+    // Find the user message before this AI message
+    let userMsgIdx = aiIndex - 1;
+    while (userMsgIdx >= 0 && messages[userMsgIdx].role !== "user") userMsgIdx--;
+    if (userMsgIdx < 0) return setRegenLoadingIndex(null);
+    const userMsg = messages[userMsgIdx];
+    // Clear the AI message content before streaming
+    setMessages((msgs) =>
+      msgs.map((msg, idx) =>
+        idx === aiIndex ? { ...msg, content: "Regenerating content..." } : msg
+      )
+    );
+    // Use the same system prompt as in page.tsx
+    const latexInstruction = `\nYou are a helpful AI assistant. When you include mathematical expressions in your responses, always format them using LaTeX syntax. Use single dollar signs \`$...$\` for inline math and double dollar signs \`$$...$$\` for display math. For example:\n\n- Inline: The solution is $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$.\n- Display:\n$$\nx = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}\n$$\n\nDo not use any other delimiters for math. Always escape backslashes as needed for LaTeX.`;
+    const apiBase = typeof window !== "undefined" && window.location.hostname === "localhost"
+      ? "http://localhost:8000/api/chat"
+      : "https://api-empty-paper-274.fly.dev/api/chat";
+    try {
+      const response = await fetch(apiBase, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          developer_message: messages[0]?.content + latexInstruction,
+          user_message: userMsg.content,
+          model: "gpt-4.1-mini",
+          api_key: localStorage.getItem("openai_api_key") || "",
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to regenerate response");
+      if (!response.body) throw new Error("No response body");
+      const reader = response.body.getReader();
+      let aiMsg = "";
+      let done = false;
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        if (value) {
+          aiMsg += new TextDecoder().decode(value);
+          setMessages((msgs) =>
+            msgs.map((msg, idx) =>
+              idx === aiIndex ? { ...msg, content: aiMsg } : msg
+            )
+          );
+        }
+      }
+    } catch {
+      setMessages((msgs) =>
+        msgs.map((msg, idx) =>
+          idx === aiIndex ? { ...msg, content: "Error: Could not regenerate response." } : msg
+        )
+      );
+    } finally {
+      setRegenLoadingIndex(null);
+    }
+  };
 
   return (
     <motion.div
@@ -78,7 +139,15 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                   exit={{ opacity: 0, y: 20 }}
                   transition={{ duration: 0.3, type: "spring" }}
                 >
-                  <ConversationBubble role={msg.role} content={msg.content} time={msg.time} />
+                  <ConversationBubble
+                    role={msg.role}
+                    content={msg.content}
+                    time={msg.time}
+                    onRegenerate={msg.role === "ai" ? () => handleRegenerate(idx) : undefined}
+                  />
+                  {regenLoadingIndex === idx && (
+                    <span className="ml-2 text-xs text-gray-400 animate-pulse">Regenerating...</span>
+                  )}
                 </motion.div>
               ))}
             </AnimatePresence>

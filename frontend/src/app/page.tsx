@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaFeatherAlt, FaMagic, FaUser, FaRobot } from "react-icons/fa";
+import { FaFeatherAlt, FaMagic } from "react-icons/fa";
 import ChatWindow from "./ChatWindow";
 
 interface Message {
@@ -273,9 +273,10 @@ Do not use any other delimiters for math. Always escape backslashes as needed fo
         handleSend={handleSend}
         clearChat={clearChat}
         setUserInput={setUserInput}
-        chatEndRef={chatEndRef}
+        setMessages={setMessages}
         missingApiKey={missingApiKey}
         onShowSettings={() => setShowSettings(true)}
+        chatEndRef={chatEndRef}
       />
       <footer className="text-xs text-yellow-900 font-noto-serif drop-shadow-sm mt-1 mb-0">Built with Next.js, Tailwind CSS, Framer Motion, and FastAPI &mdash; Inspired by Studio Ghibli</footer>
     </div>

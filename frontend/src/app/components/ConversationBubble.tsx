@@ -2,15 +2,16 @@ import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
-import { FaUser, FaRobot, FaRegCopy, FaCheck } from "react-icons/fa";
+import { FaUser, FaRobot, FaRegCopy, FaCheck, FaRedo } from "react-icons/fa";
 
 interface ConversationBubbleProps {
   role: "user" | "ai";
   content: string;
   time: string;
+  onRegenerate?: () => void;
 }
 
-const ConversationBubble: React.FC<ConversationBubbleProps> = ({ role, content, time }) => {
+const ConversationBubble: React.FC<ConversationBubbleProps> = ({ role, content, time, onRegenerate }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -46,16 +47,26 @@ const ConversationBubble: React.FC<ConversationBubbleProps> = ({ role, content, 
         </div>
         <div className="flex items-end justify-between mt-1">
           <div className="text-xs text-gray-400 font-quicksand">{time}</div>
-          {/* Copy button for AI bubbles only */}
+          {/* Copy and Regenerate buttons for AI bubbles only */}
           {role === "ai" && (
-            <button
-              className="ml-2 p-1 rounded ghibli-btn text-xs flex items-center gap-1"
-              onClick={handleCopy}
-              title={copied ? "Copied!" : "Copy to clipboard"}
-              aria-label="Copy to clipboard"
-            >
-              {copied ? <FaCheck className="text-green-600" /> : <FaRegCopy />}
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                className="p-1 rounded ghibli-btn text-xs flex items-center gap-1"
+                onClick={handleCopy}
+                title={copied ? "Copied!" : "Copy to clipboard"}
+                aria-label="Copy to clipboard"
+              >
+                {copied ? <FaCheck className="text-green-600" /> : <FaRegCopy />}
+              </button>
+              <button
+                className="p-1 rounded ghibli-btn text-xs flex items-center gap-1"
+                onClick={onRegenerate}
+                title="Regenerate response"
+                aria-label="Regenerate response"
+              >
+                <FaRedo />
+              </button>
+            </div>
           )}
         </div>
       </div>
