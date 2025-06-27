@@ -28,6 +28,7 @@ export default function Home() {
   const [showSettings, setShowSettings] = useState(false);
   const [loading, setLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const missingApiKey = !apiKey;
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -261,6 +262,8 @@ export default function Home() {
         clearChat={clearChat}
         setUserInput={setUserInput}
         chatEndRef={chatEndRef}
+        missingApiKey={missingApiKey}
+        onShowSettings={() => setShowSettings(true)}
       />
       <footer className="text-xs text-yellow-900 font-noto-serif drop-shadow-sm mt-1 mb-0">Built with Next.js, Tailwind CSS, Framer Motion, and FastAPI &mdash; Inspired by Studio Ghibli</footer>
     </div>

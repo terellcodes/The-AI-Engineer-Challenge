@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { FaFeatherAlt, FaUser, FaRobot } from "react-icons/fa";
+import { FaFeatherAlt, FaUser, FaRobot, FaMagic } from "react-icons/fa";
 import React from "react";
+import ChatInputForm from "./components/ChatInputForm";
 
 interface Message {
   role: "user" | "ai";
@@ -17,6 +18,8 @@ interface ChatWindowProps {
   clearChat: () => void;
   setUserInput: (val: string) => void;
   chatEndRef: React.RefObject<HTMLDivElement>;
+  missingApiKey?: boolean;
+  onShowSettings?: () => void;
 }
 
 const ChatWindow: React.FC<ChatWindowProps> = ({
@@ -28,6 +31,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   clearChat,
   setUserInput,
   chatEndRef,
+  missingApiKey,
+  onShowSettings,
 }) => {
   return (
     <motion.div
@@ -38,85 +43,83 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       transition={{ duration: 0.7, type: "spring" }}
     >
       <div className="flex-1 overflow-y-auto mb-2 pr-1">
-        <AnimatePresence initial={false}>
-          {messages.map((msg, idx) => (
-            <motion.div
-              key={idx}
-              className={`flex mb-4 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              transition={{ duration: 0.3, type: "spring" }}
-            >
-              <div
-                className={`ghibli-rounded px-4 py-2 max-w-[60%] text-base shadow flex items-start gap-2 ${
-                  msg.role === "user"
-                    ? "bg-yellow-100 text-yellow-900 rounded-br-none border-2 border-yellow-200"
-                    : "bg-white text-green-900 rounded-bl-none border-2 border-green-100"
-                }`}
-                style={{ fontFamily: msg.role === "user" ? 'Quicksand' : 'Noto Serif JP' }}
-              >
-                <span className="mt-1">
-                  {msg.role === "user" ? (
-                    <FaUser className="text-yellow-700" />
-                  ) : (
-                    <FaRobot className="text-green-700" />
-                  )}
-                </span>
-                <div>
-                  <div>{msg.content}</div>
-                  <div className="text-xs text-gray-400 mt-1 text-right font-quicksand">{msg.time}</div>
-                </div>
+        {missingApiKey ? (
+          <div className="flex justify-center mb-6">
+            <div className="ghibli-rounded bg-yellow-100 border-2 border-yellow-300 px-6 py-4 flex flex-col items-center shadow max-w-[60%]">
+              <div className="text-yellow-900 font-noto-serif text-lg mb-2 flex items-center gap-2">
+                <FaMagic className="text-yellow-700" />
+                Please add your OpenAI API key to start chatting!
               </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-        {loading && (
-          <motion.div
-            className="flex justify-start mb-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <div className="ghibli-rounded px-4 py-2 max-w-[75%] text-base shadow bg-white text-green-900 rounded-bl-none flex items-center gap-2 border-2 border-green-100">
-              <FaRobot className="animate-bounce text-green-700" />
-              <span>AI is thinking...</span>
+              <button
+                className="ghibli-btn px-4 py-2 mt-2"
+                onClick={onShowSettings}
+              >
+                Add OpenAI Key
+              </button>
             </div>
-          </motion.div>
+          </div>
+        ) : (
+          <>
+            <AnimatePresence initial={false}>
+              {messages.map((msg, idx) => (
+                <motion.div
+                  key={idx}
+                  className={`flex mb-4 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.3, type: "spring" }}
+                >
+                  <div
+                    className={`ghibli-rounded px-4 py-2 max-w-[60%] text-base shadow flex items-start gap-2 ${
+                      msg.role === "user"
+                        ? "bg-yellow-100 text-yellow-900 rounded-br-none border-2 border-yellow-200"
+                        : "bg-white text-green-900 rounded-bl-none border-2 border-green-100"
+                    }`}
+                    style={{ fontFamily: msg.role === "user" ? 'Quicksand' : 'Noto Serif JP' }}
+                  >
+                    <span className="mt-1">
+                      {msg.role === "user" ? (
+                        <FaUser className="text-yellow-700" />
+                      ) : (
+                        <FaRobot className="text-green-700" />
+                      )}
+                    </span>
+                    <div>
+                      <div>{msg.content}</div>
+                      <div className="text-xs text-gray-400 mt-1 text-right font-quicksand">{msg.time}</div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+            {loading && (
+              <motion.div
+                className="flex justify-start mb-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <div className="ghibli-rounded px-4 py-2 max-w-[75%] text-base shadow bg-white text-green-900 rounded-bl-none flex items-center gap-2 border-2 border-green-100">
+                  <FaRobot className="animate-bounce text-green-700" />
+                  <span>AI is thinking...</span>
+                </div>
+              </motion.div>
+            )}
+            <div ref={chatEndRef} />
+          </>
         )}
-        <div ref={chatEndRef} />
       </div>
-      <form
-        className="flex items-end gap-2 relative pt-2 bg-transparent"
-        onSubmit={e => { e.preventDefault(); handleSend(); }}
-      >
-        <span className="input-icon left-4"><FaUser /></span>
-        <textarea
-          className="ghibli-input flex-1 pl-10 pr-3 py-2 resize-none min-h-[40px] max-h-[120px] text-base"
-          placeholder="Type your message here..."
-          value={userInput}
-          onChange={(e) => setUserInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          rows={1}
-          disabled={loading}
-          style={{ fontFamily: 'Quicksand' }}
+      {!missingApiKey && (
+        <ChatInputForm
+          userInput={userInput}
+          handleKeyDown={handleKeyDown}
+          handleSend={handleSend}
+          clearChat={clearChat}
+          setUserInput={setUserInput}
+          loading={loading}
         />
-        <button
-          type="submit"
-          className="ghibli-btn px-5 py-2 flex items-center gap-2"
-          disabled={loading || !userInput.trim()}
-        >
-          <FaFeatherAlt /> Send
-        </button>
-        <button
-          type="button"
-          className="ghibli-btn px-4 py-2"
-          onClick={clearChat}
-          disabled={loading}
-        >
-          Clear
-        </button>
-      </form>
+      )}
     </motion.div>
   );
 };
