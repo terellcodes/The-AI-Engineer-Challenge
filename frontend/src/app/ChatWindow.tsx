@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { FaUser, FaRobot, FaMagic } from "react-icons/fa";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import ChatInputForm from "./components/ChatInputForm";
 import ConversationBubble from "./components/ConversationBubble";
 
@@ -18,7 +18,6 @@ interface ChatWindowProps {
   handleSend: () => void;
   clearChat: () => void;
   setUserInput: (val: string) => void;
-  chatEndRef: React.RefObject<HTMLDivElement>;
   missingApiKey?: boolean;
   onShowSettings?: () => void;
 }
@@ -31,10 +30,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   handleSend,
   clearChat,
   setUserInput,
-  chatEndRef,
   missingApiKey,
   onShowSettings,
 }) => {
+  const scrollableRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = scrollableRef.current;
+    if (el) {
+      el.scrollTop = el.scrollHeight;
+    }
+  }, [messages, loading]);
+
   return (
     <motion.div
       className="w-4/5 max-w-8xl flex flex-col ghibli-shadow ghibli-rounded p-4 sm:p-8 border-2 border-[#e6dcc3] relative z-10 h-[85vh] min-h-[500px] mx-auto"
@@ -43,7 +50,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, type: "spring" }}
     >
-      <div className="flex-1 overflow-y-auto mb-2 pr-1">
+      <div className="flex-1 overflow-y-auto mb-2 pr-1" ref={scrollableRef}>
         {missingApiKey ? (
           <div className="flex justify-center mb-6">
             <div className="ghibli-rounded bg-yellow-100 border-2 border-yellow-300 px-6 py-4 flex flex-col items-center shadow max-w-[60%]">
@@ -88,7 +95,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                 </div>
               </motion.div>
             )}
-            <div ref={chatEndRef} />
           </>
         )}
       </div>
