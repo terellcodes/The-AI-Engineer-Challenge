@@ -31,7 +31,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 }) => {
   return (
     <motion.div
-      className="w-4/5 max-w-8xl flex flex-col bg-ghibli-parchment ghibli-shadow ghibli-rounded p-4 sm:p-8 border-2 border-[#e6dcc3] relative z-10 h-[85vh] min-h-[500px] mx-auto"
+      className="w-4/5 max-w-8xl flex flex-col ghibli-shadow ghibli-rounded p-4 sm:p-8 border-2 border-[#e6dcc3] relative z-10 h-[85vh] min-h-[500px] mx-auto"
+      style={{ background: 'rgba(180, 210, 180, 0.35)' }}
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, type: "spring" }}
