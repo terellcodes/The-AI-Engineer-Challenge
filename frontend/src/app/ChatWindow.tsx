@@ -48,7 +48,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
               transition={{ duration: 0.3, type: "spring" }}
             >
               <div
-                className={`ghibli-rounded px-4 py-2 max-w-[75%] text-base shadow flex items-start gap-2 ${
+                className={`ghibli-rounded px-4 py-2 max-w-[60%] text-base shadow flex items-start gap-2 ${
                   msg.role === "user"
                     ? "bg-yellow-100 text-yellow-900 rounded-br-none border-2 border-yellow-200"
                     : "bg-white text-green-900 rounded-bl-none border-2 border-green-100"
