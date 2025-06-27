@@ -276,7 +276,6 @@ Do not use any other delimiters for math. Always escape backslashes as needed fo
         setMessages={setMessages}
         missingApiKey={missingApiKey}
         onShowSettings={() => setShowSettings(true)}
-        chatEndRef={chatEndRef}
       />
       <footer className="text-xs text-yellow-900 font-noto-serif drop-shadow-sm mt-1 mb-0">Built with Next.js, Tailwind CSS, Framer Motion, and FastAPI &mdash; Inspired by Studio Ghibli</footer>
     </div>
