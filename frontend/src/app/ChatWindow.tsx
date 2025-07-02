@@ -63,7 +63,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     const latexInstruction = `\nYou are a helpful AI assistant. When you include mathematical expressions in your responses, always format them using LaTeX syntax. Use single dollar signs \`$...$\` for inline math and double dollar signs \`$$...$$\` for display math. For example:\n\n- Inline: The solution is $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$.\n- Display:\n$$\nx = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}\n$$\n\nDo not use any other delimiters for math. Always escape backslashes as needed for LaTeX.`;
     const apiBase = typeof window !== "undefined" && window.location.hostname === "localhost"
       ? "http://localhost:8000/api/chat"
-      : "https://api-empty-paper-274.fly.dev/api/chat";
+      : "https://the-ai-engineer-challenge-roan.vercel.app/api/chat";
     try {
       const response = await fetch(apiBase, {
         method: "POST",

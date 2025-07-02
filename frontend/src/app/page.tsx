@@ -38,7 +38,7 @@ export default function Home() {
     if (typeof window !== "undefined" && window.location.hostname === "localhost") {
       return "http://localhost:8000/api/chat";
     }
-    return "https://api-empty-paper-274.fly.dev/api/chat";
+    return "https://the-ai-engineer-challenge-roan.vercel.app/api/chat";
   };
 
   const handleSend = async () => {
