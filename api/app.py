@@ -136,13 +136,15 @@ async def chat_with_pdf(request: PDFChatRequest):
 
         # Use gpt-4o-mini for chat
         chat_model = ChatOpenAI(model_name="gpt-4o-mini", api_key=request.api_key)
-        response = chat_model.run([
+        messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
-        ])
-        print(f"Response from chat model: {response}")
-
-        return response
+        ]
+        async def generate():
+            async for chunk in chat_model.astream(messages):
+                if chunk:
+                    yield chunk
+        return StreamingResponse(generate(), media_type="text/plain")
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
