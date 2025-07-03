@@ -67,7 +67,8 @@ export default function Home() {
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         },
       ]);
-    } catch () {
+    } catch (err) {
+      console.log(err);
       setUploadStatus("Upload error");
     }
   };
