@@ -109,7 +109,7 @@ async def upload_pdf(file: UploadFile = File(...), api_key: str = Form(...)):
         print(f"Using api_key for vector DB: {'*' * (len(api_key)-4) + api_key[-4:] if api_key else 'None'}")
         global vector_db, pdf_chunks
         embedding_model = EmbeddingModel(api_key=api_key)
-        vector_db = await VectorDatabase(embedding_model=embedding_model).abuild_from_list(chunks)
+        vector_db = await VectorDatabase(embedding_model=embedding_model).abuild_from_list(chunks, batch_size=250)
         pdf_chunks = chunks
         print("Vector DB built and chunks stored in memory")
 
