@@ -27,6 +27,8 @@ export default function Home() {
   const [systemPrompt, setSystemPrompt] = useState(defaultSystemPrompt);
   const [showSettings, setShowSettings] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<string | undefined>(undefined);
+  const [pdfUploaded, setPdfUploaded] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const missingApiKey = !apiKey;
 
@@ -39,6 +41,35 @@ export default function Home() {
       return "http://localhost:8000/api/chat";
     }
     return "https://the-ai-engineer-challenge-roan.vercel.app/api/chat";
+  };
+
+  const handleUploadPDF = async (file: File) => {
+    setUploadStatus("Uploading...");
+    setPdfUploaded(false);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("api_key", apiKey);
+      const response = await fetch("/api/upload_pdf", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) {
+        setUploadStatus("Upload failed");
+        return;
+      }
+      setUploadStatus("PDF uploaded and indexed!");
+      setPdfUploaded(true);
+      setMessages([
+        {
+          role: "ai",
+          content: "PDF uploaded and indexed! You can now ask questions about your document.",
+          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        },
+      ]);
+    } catch (err) {
+      setUploadStatus("Upload error");
+    }
   };
 
   const handleSend = async () => {
@@ -57,29 +88,29 @@ export default function Home() {
     setUserInput("");
     setLoading(true);
     try {
-      const latexInstruction = `
-You are a helpful AI assistant. When you include mathematical expressions in your responses, always format them using LaTeX syntax. Use single dollar signs \`$...$\` for inline math and double dollar signs \`$$...$$\` for display math. For example:
-
-- Inline: The solution is $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$.
-- Display:
-$$
-x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}
-$$
-
-Do not use any other delimiters for math. Always escape backslashes as needed for LaTeX.
-`;
-
-      const response = await fetch(getApiBaseUrl(), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          developer_message: systemPrompt + '\\n\\n' + latexInstruction,
-          user_message: userInput,
-          model,
-          api_key: apiKey,
-        }),
-      });
-
+      let response;
+      if (pdfUploaded) {
+        response = await fetch("/api/chat_with_pdf", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_message: userInput,
+            api_key: apiKey,
+          }),
+        });
+      } else {
+        const latexInstruction = `\nYou are a helpful AI assistant. When you include mathematical expressions in your responses, always format them using LaTeX syntax. Use single dollar signs \`$...$\` for inline math and double dollar signs \`$$...$$\` for display math. For example:\n\n- Inline: The solution is $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$.\n- Display:\n$$\nx = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}\n$$\n\nDo not use any other delimiters for math. Always escape backslashes as needed for LaTeX.`;
+        response = await fetch(getApiBaseUrl(), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            developer_message: systemPrompt + '\n\n' + latexInstruction,
+            user_message: userInput,
+            model,
+            api_key: apiKey,
+          }),
+        });
+      }
       if (!response.ok) {
         const errorText = await response.text();
         setMessages((msgs) => [
@@ -93,7 +124,6 @@ Do not use any other delimiters for math. Always escape backslashes as needed fo
         setLoading(false);
         return;
       }
-
       if (!response.body) throw new Error("No response body");
       const reader = response.body.getReader();
       let aiMsg = "";
@@ -276,6 +306,8 @@ Do not use any other delimiters for math. Always escape backslashes as needed fo
         setMessages={setMessages}
         missingApiKey={missingApiKey}
         onShowSettings={() => setShowSettings(true)}
+        onUploadPDF={handleUploadPDF}
+        uploadStatus={uploadStatus}
       />
       <footer className="text-xs text-yellow-900 font-noto-serif drop-shadow-sm mt-1 mb-0">Built with Next.js, Tailwind CSS, Framer Motion, and FastAPI &mdash; Inspired by Studio Ghibli</footer>
     </div>

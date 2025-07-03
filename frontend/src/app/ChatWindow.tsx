@@ -21,6 +21,8 @@ interface ChatWindowProps {
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   missingApiKey?: boolean;
   onShowSettings?: () => void;
+  onUploadPDF?: (file: File) => void;
+  uploadStatus?: string;
 }
 
 const ChatWindow: React.FC<ChatWindowProps> = ({
@@ -34,6 +36,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   setMessages,
   missingApiKey,
   onShowSettings,
+  onUploadPDF,
+  uploadStatus,
 }) => {
   const scrollableRef = useRef<HTMLDivElement>(null);
   const [regenLoadingIndex, setRegenLoadingIndex] = useState<number | null>(null);
@@ -176,6 +180,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           clearChat={clearChat}
           setUserInput={setUserInput}
           loading={loading}
+          onUploadPDF={onUploadPDF}
+          uploadStatus={uploadStatus}
         />
       )}
     </motion.div>
