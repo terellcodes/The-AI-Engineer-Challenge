@@ -1,5 +1,3 @@
-import { AnimatePresence, motion } from "framer-motion";
-import { FaRobot, FaMagic } from "react-icons/fa";
 import React, { useEffect, useRef, useState } from "react";
 import ChatInputForm from "./components/ChatInputForm";
 import ConversationBubble from "./components/ConversationBubble";

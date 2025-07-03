@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import { FaFeatherAlt, FaUser } from "react-icons/fa";
+import { FaFeatherAlt } from "react-icons/fa";
 
 interface ChatInputFormProps {
   userInput: string;

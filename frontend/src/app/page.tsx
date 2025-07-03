@@ -1,7 +1,5 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { FaFeatherAlt, FaMagic } from "react-icons/fa";
 import ChatWindow from "./ChatWindow";
 import Sidebar from "./components/Sidebar";
 
@@ -231,11 +229,6 @@ export default function Home() {
     setModel(localStorage.getItem("openai_model") || "gpt-4.1-mini");
     setSystemPrompt(localStorage.getItem("openai_system_prompt") || defaultSystemPrompt);
   }, []);
-  const saveSettings = () => {
-    localStorage.setItem("openai_api_key", apiKey);
-    localStorage.setItem("openai_model", model);
-    localStorage.setItem("openai_system_prompt", systemPrompt);
-  };
 
   return (
     <div className="min-h-screen h-screen flex font-mono bg-[#181a20] relative">
