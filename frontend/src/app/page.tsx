@@ -90,7 +90,7 @@ export default function Home() {
     try {
       let response;
       if (pdfUploaded) {
-        response = await fetch("/api/chat_with_pdf", {
+        const response: Response = await fetch("/api/chat_with_pdf", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -112,7 +112,7 @@ export default function Home() {
           setLoading(false);
           return;
         }
-        const data = await response.json();
+        const data: { response?: string; followups?: string[] } = await response.json();
         let aiContent = data.response || "";
         let followups = data.followups || [];
         // If the response is a stringified JSON, parse it

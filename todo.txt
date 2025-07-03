@@ -1,9 +1,40 @@
-Task 1:
-Modify the application (frontend and backend) to: 
+Task 1: Redesign UI To resemble an IDE
+- Remove studio ghibli references from cursor rules
+- Ask for a screenshot for inspiration
+    - new UI should match the color theming instead of studio ghibli
+- UI should contain
+    - collapsible left side panel
+        - this is where you will be able to configure settings including
+            - open ai key
+            - system prompt
+            - model selection
+            - upload pdf
+    - main content panel
+        - this is where the chat conversation takes place
+        - at the bottom will be the chat input box but it should resemble a terminal window like in an IDE
+            - include send and clear button
 
-- Allow the user to upload a PDF
-- Index the PDF using the `aimakerspace` library
-- Chat with the PDF using a simple RAG system built with the `aimakerspace` library
+Task 2: Suggest followup questions for each chat response
+- UI
+    - below each chat assistant conversation response should be three suggested followup questions
+- To fetch the followup questions:
+    - modify the chat_with_pdf prompt, ask LLM to return 3 questions based on the chunks provided in the prompt
+    - return these 3 questions in the response
 
-Task 2:
-TBD
+
+Task 3: Data Structure + Abstract Data Type Anotation and Followup questions
+- When there is a data structure, abstract data type or method or algorithm returned in the response make it hoverable
+- Upon hover there should be an interactive pop up with a description of the entity as follows:
+    - for data structure
+        - description
+        - common operations
+        - common applications
+    - for abstract data types (ADT):
+        - types of implementations
+        - common applications
+    - for algorithms and methods
+        - time and space complexity
+        - common applications
+- fetch the descriptsion from the pdf
+
+
