@@ -97,6 +97,7 @@ export default function Home() {
           body: JSON.stringify({
             user_message: userInput,
             api_key: apiKey,
+            k: 5,
           }),
         });
       } else {
