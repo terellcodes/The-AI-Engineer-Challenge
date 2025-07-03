@@ -22,6 +22,7 @@ from aimakerspace.text_utils import PDFLoader, CharacterTextSplitter
 from aimakerspace.vectordatabase import VectorDatabase
 from aimakerspace.openai_utils.chatmodel import ChatOpenAI
 from aimakerspace.openai_utils.embedding import EmbeddingModel
+import asyncio
 
 
 # Initialize FastAPI application with a title
@@ -134,10 +135,13 @@ async def chat_with_pdf(request: PDFChatRequest):
         top_chunks = vector_db.search_by_text(request.user_message, k=request.k, return_as_text=True)
         context = "\n---\n".join(top_chunks)
 
-        # Compose prompt for RAG
+        # Compose prompt for RAG with followup question instruction
         system_prompt = (
-            "You are an AI assistant. Use the following PDF context to answer the user's question as accurately as possible.\n"
-            "If the answer is not in the context, say you don't know.\n\nContext:\n" + context
+            "You are an AI assistant. Use the following PDF context to answer the user's question as accurately as possible. "
+            "If the answer is not in the context, say you don't know.\n\n"
+            "After your answer, suggest three relevant followup questions the user might ask next, based on the context and your answer. "
+            "Return your response as a JSON object with two fields: 'response' (your answer) and 'followups' (a list of three followup questions). "
+            "Do not include any other text.\n\nContext:\n" + context
         )
         user_prompt = request.user_message
 
@@ -147,11 +151,15 @@ async def chat_with_pdf(request: PDFChatRequest):
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ]
-        async def generate():
-            async for chunk in chat_model.astream(messages):
-                if chunk:
-                    yield chunk
-        return StreamingResponse(generate(), media_type="text/plain")
+        # Get the full response (not streaming)
+        response = await asyncio.to_thread(chat_model.run, messages, text_only=True)
+        import json
+        try:
+            data = json.loads(response)
+            return JSONResponse(content=data)
+        except Exception:
+            # If parsing fails, return the raw response as 'response' and no followups
+            return JSONResponse(content={"response": response, "followups": []})
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 

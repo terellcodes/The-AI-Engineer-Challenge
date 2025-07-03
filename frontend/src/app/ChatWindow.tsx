@@ -8,6 +8,7 @@ interface Message {
   role: "user" | "ai";
   content: string;
   time: string;
+  followups?: string[];
 }
 
 interface ChatWindowProps {
@@ -108,24 +109,26 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     }
   };
 
+  // Handle followup click
+  const handleFollowupClick = (question: string) => {
+    setUserInput(question);
+    setTimeout(() => handleSend(), 0);
+  };
+
   return (
-    <motion.div
-      className="w-4/5 max-w-8xl flex flex-col ghibli-shadow ghibli-rounded p-4 sm:p-8 border-2 border-[#e6dcc3] relative z-10 h-[85vh] min-h-[500px] mx-auto"
-      style={{ background: 'rgba(180, 210, 180, 0.35)' }}
-      initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, type: "spring" }}
+    <div
+      className="flex flex-col flex-1 h-full w-full bg-[#23272e] rounded-lg shadow-lg border border-[#31343c] p-0"
+      style={{ fontFamily: 'var(--font-mono, monospace)' }}
     >
-      <div className="flex-1 overflow-y-auto mb-2 pr-1" ref={scrollableRef}>
+      <div className="flex-1 overflow-y-auto mb-2 pr-1 px-6 pt-6">
         {missingApiKey ? (
           <div className="flex justify-center mb-6">
-            <div className="ghibli-rounded bg-yellow-100 border-2 border-yellow-300 px-6 py-4 flex flex-col items-center shadow max-w-[60%]">
-              <div className="text-yellow-900 font-noto-serif text-lg mb-2 flex items-center gap-2">
-                <FaMagic className="text-yellow-700" />
+            <div className="rounded bg-[#31343c] border border-gray-700 px-6 py-4 flex flex-col items-center shadow max-w-[60%]">
+              <div className="text-gray-200 font-mono text-lg mb-2 flex items-center gap-2">
                 Please add your OpenAI API key to start chatting!
               </div>
               <button
-                className="ghibli-btn px-4 py-2 mt-2"
+                className="bg-[#23272e] text-gray-200 px-4 py-2 rounded border border-[#31343c] mt-2 font-mono"
                 onClick={onShowSettings}
               >
                 Add OpenAI Key
@@ -134,58 +137,51 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           </div>
         ) : (
           <>
-            <AnimatePresence initial={false}>
-              {messages.map((msg, idx) => (
-                <motion.div
-                  key={idx}
-                  className={`flex mb-4 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.3, type: "spring" }}
-                >
-                  <ConversationBubble
-                    role={msg.role}
-                    content={msg.content}
-                    time={msg.time}
-                    onRegenerate={msg.role === "ai" ? () => handleRegenerate(idx) : undefined}
-                  />
-                  {regenLoadingIndex === idx && (
-                    <span className="ml-2 text-xs text-gray-400 animate-pulse">Regenerating...</span>
-                  )}
-                </motion.div>
-              ))}
-            </AnimatePresence>
-            {loading && (
-              <motion.div
-                className="flex justify-start mb-4"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+            {messages.map((msg, idx) => (
+              <div
+                key={idx}
+                className={`flex mb-4 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
-                <div className="ghibli-rounded px-4 py-2 max-w-[75%] text-base shadow bg-white text-green-900 rounded-bl-none flex items-center gap-2 border-2 border-green-100">
-                  <FaRobot className="animate-bounce text-green-700" />
+                <ConversationBubble
+                  role={msg.role}
+                  content={msg.content}
+                  time={msg.time}
+                  onRegenerate={msg.role === "ai" ? () => handleRegenerate(idx) : undefined}
+                  followups={msg.followups}
+                  onFollowupClick={handleFollowupClick}
+                />
+                {regenLoadingIndex === idx && (
+                  <span className="ml-2 text-xs text-gray-400 animate-pulse">Regenerating...</span>
+                )}
+              </div>
+            ))}
+            {loading && (
+              <div className="flex justify-start mb-4">
+                <div className="rounded px-4 py-2 max-w-[75%] text-base shadow bg-[#181a20] text-gray-200 rounded-bl-none flex items-center gap-2 border border-gray-700">
+                  <span className="animate-bounce">🤖</span>
                   <span>AI is thinking...</span>
                 </div>
-              </motion.div>
+              </div>
             )}
           </>
         )}
       </div>
       {!missingApiKey && (
-        <ChatInputForm
-          userInput={userInput}
-          handleKeyDown={handleKeyDown}
-          handleSend={handleSend}
-          clearChat={clearChat}
-          setUserInput={setUserInput}
-          loading={loading}
-          onUploadPDF={onUploadPDF}
-          uploadStatus={uploadStatus}
-        />
+        <div className="w-full border-t border-[#31343c] bg-[#181a20] px-6 py-4 flex flex-col">
+          <ChatInputForm
+            userInput={userInput}
+            handleKeyDown={handleKeyDown}
+            handleSend={handleSend}
+            clearChat={clearChat}
+            setUserInput={setUserInput}
+            loading={loading}
+            onUploadPDF={onUploadPDF}
+            uploadStatus={uploadStatus}
+          />
+        </div>
       )}
-    </motion.div>
+    </div>
   );
 };
 
-export default ChatWindow; 
+export default ChatWindow;

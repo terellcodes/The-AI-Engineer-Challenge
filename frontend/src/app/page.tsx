@@ -9,6 +9,7 @@ interface Message {
   role: "user" | "ai";
   content: string;
   time: string;
+  followups?: string[];
 }
 
 const defaultSystemPrompt =
@@ -100,6 +101,41 @@ export default function Home() {
             k: 5,
           }),
         });
+        if (!response.ok) {
+          const errorText = await response.text();
+          setMessages((msgs) => [
+            ...msgs,
+            {
+              role: "ai",
+              content: `Error: ${response.status} ${response.statusText}\n${errorText}`,
+              time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            },
+          ]);
+          setLoading(false);
+          return;
+        }
+        const data = await response.json();
+        let aiContent = data.response || "";
+        let followups = data.followups || [];
+        // If the response is a stringified JSON, parse it
+        if (typeof aiContent === "string" && aiContent.trim().startsWith("{")) {
+          try {
+            const parsed = JSON.parse(aiContent);
+            aiContent = parsed.response || aiContent;
+            followups = parsed.followups || followups;
+          } catch {}
+        }
+        setMessages((msgs) => [
+          ...msgs,
+          {
+            role: "ai",
+            content: aiContent,
+            time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            followups,
+          },
+        ]);
+        setLoading(false);
+        return;
       } else {
         const latexInstruction = `\nYou are a helpful AI assistant. When you include mathematical expressions in your responses, always format them using LaTeX syntax. Use single dollar signs \`$...$\` for inline math and double dollar signs \`$$...$$\` for display math. For example:\n\n- Inline: The solution is $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$.\n- Display:\n$$\nx = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}\n$$\n\nDo not use any other delimiters for math. Always escape backslashes as needed for LaTeX.`;
         response = await fetch(getApiBaseUrl(), {
