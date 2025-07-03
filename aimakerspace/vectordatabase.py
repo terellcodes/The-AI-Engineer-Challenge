@@ -12,6 +12,11 @@ def cosine_similarity(vector_a: np.array, vector_b: np.array) -> float:
     norm_b = np.linalg.norm(vector_b)
     return dot_product / (norm_a * norm_b)
 
+def batch_list(lst, batch_size):
+    """Yield successive batches from lst of size batch_size."""
+    for i in range(0, len(lst), batch_size):
+        yield lst[i:i + batch_size]
+
 
 class VectorDatabase:
     def __init__(self, embedding_model: EmbeddingModel = None):
@@ -47,10 +52,16 @@ class VectorDatabase:
     def retrieve_from_key(self, key: str) -> np.array:
         return self.vectors.get(key, None)
 
-    async def abuild_from_list(self, list_of_text: List[str]) -> "VectorDatabase":
-        embeddings = await self.embedding_model.async_get_embeddings(list_of_text)
-        for text, embedding in zip(list_of_text, embeddings):
-            self.insert(text, np.array(embedding))
+    async def abuild_from_list(self, list_of_text: List[str], batch_size: int = 100) -> "VectorDatabase":
+        print(f"Building vector database from {len(list_of_text)} texts with batch size {batch_size}")
+        total_batches = (len(list_of_text) + batch_size - 1) // batch_size
+        for batch_num, batch in enumerate(batch_list(list_of_text, batch_size), 1):
+            print(f"Processing batch {batch_num}/{total_batches} ({len(batch)} texts)")
+            embeddings = await self.embedding_model.async_get_embeddings(batch)
+            print(f"Generated {len(embeddings)} embeddings for batch {batch_num}")
+            for text, embedding in zip(batch, embeddings):
+                self.insert(text, np.array(embedding))
+        print("Finished building vector database")
         return self
 
 
